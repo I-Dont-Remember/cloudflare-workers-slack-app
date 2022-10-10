@@ -13,11 +13,29 @@ import SlackREST from '@sagi.io/workers-slack'
 
 const honoApp = new Hono()
 
+function byteStringToUint8Array(byteString) {
+	const ui = new Uint8Array(byteString.length);
+	for (let i = 0; i < byteString.length; ++i) {
+	  ui[i] = byteString.charCodeAt(i);
+	}
+	return ui;
+  }
+
+const hexToBuffer = (hex: string) => {
+	const matches = hex.match(/[\da-f]{2}/gi) ?? [];
+	const typedArray = new Uint8Array(
+	  matches.map(function (h) {
+		return parseInt(h, 16);
+	  })
+	);
+	return typedArray.buffer;
+  };
 
 const verifySlackRequestSignature = async ({
 	signingSecret, requestSignature, requestTimestamp, body,
   }) => {
 	console.log('Attempting verification')
+	const algorithm = { name: 'HMAC', hash: 'SHA-256' };
 	const encoder = new TextEncoder();
 
 	// based of Slack SDK tooling https://github.com/slackapi/node-slack-sdk/blob/c066a8923eda07a4997fa186d009a7ad6b225800/packages/events-api/src/http-handler.ts#L38
@@ -32,27 +50,27 @@ const verifySlackRequestSignature = async ({
 	const key = await crypto.subtle.importKey(
 		'raw',
 		encoder.encode(signingSecret),
-		{ name: 'HMAC', hash: 'SHA-256' },
+		algorithm,
 		false,
-		['verify']
+		['sign', 'verify']
 	  );
+	console.log('got crypto key')
 
 	const [version, hash] = requestSignature.split('=');
 
 	const dataToAuthenticate = `${version}:${requestTimestamp}:${body}`;
-
-	function byteStringToUint8Array(byteString) {
-		const ui = new Uint8Array(byteString.length);
-		for (let i = 0; i < byteString.length; ++i) {
-		  ui[i] = byteString.charCodeAt(i);
-		}
-		return ui;
-	  }
+  
+	const generatedSignature = await crypto.subtle.sign(
+		algorithm.name,
+		key,
+		encoder.encode(dataToAuthenticate)
+	);
+	console.log(`Generated Signature vs hash: ${generatedSignature} vs ${hash}`)
 
 	const verified = await crypto.subtle.verify(
-		'HMAC',
+		algorithm.name,
 		key,
-		byteStringToUint8Array(hash),
+		hexToBuffer(hash),
 		encoder.encode(dataToAuthenticate)
 	  );
 	console.log(`isVerified: ${verified}`)
@@ -98,6 +116,7 @@ const handlerAppHomeOpened = async (c, slackClient, event) => {
 		user_id: event.user,
 		view: appHomeView
 	})
+	console.log(result)
 
 	return c.json({ ok: true })
 }
@@ -126,12 +145,12 @@ honoApp.post('/slack/events', async (c) => {
 	} 
 
 	// TODO: insecure without this working
-	// const verified = await verifySlackRequestSignature({
-	// 	signingSecret: c.env.SLACK_SIGNING_SECRET,
-	// 	requestSignature: c.req.header('x-slack-signature'),
-	// 	requestTimestamp: parseInt(c.req.header('x-slack-request-timestamp'), 10),
-	// 	body: textBody // might blow up in our face
-	// });
+	const verified = await verifySlackRequestSignature({
+		signingSecret: c.env.SLACK_SIGNING_SECRET,
+		requestSignature: c.req.header('x-slack-signature'),
+		requestTimestamp: parseInt(c.req.header('x-slack-request-timestamp'), 10),
+		body: textBody // might blow up in our face
+	});
 
 	// if (!verified) {
 	// 	c.status(404)
