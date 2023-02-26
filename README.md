@@ -18,6 +18,28 @@ Uses the [Sagi Slack client for Cloudflare Workers](https://sagi.io/slack-api-fo
 make run
 ```
 
+## Simple Test event
+
+```
+make send_test_event
+```
+
+Response should look something like (`404` since it's not from us, not Slack):
+
+```
+./send-test-event.sh
+HTTP/1.1 404 Not Found
+date: Mon, 27 Feb 2023 03:05:00 GMT
+content-type: application/json; charset=UTF-8
+vary: Accept-Encoding
+server: cloudflare
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+
+{"ok":false,"error":"invalid request signature"}
+```
+
 ## Deploy changes to worker
 
 ```
