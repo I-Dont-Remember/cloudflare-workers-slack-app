@@ -80,8 +80,6 @@ honoApp.post('/slack/events', async (c: Context) => {
 	// workers are serverless, have to set up client for each request
 	const slackClient: SlackRESTClient = new SlackREST({ botAccessToken });
 
-	// const rawBody = await c.req.text()
-	// const clonedRequest = c.req.clone()
 	const textBody = await c.req.text()
 	console.log(`==BODY: ${textBody}`)
 	const body = JSON.parse(textBody);
@@ -108,7 +106,6 @@ honoApp.post('/slack/events', async (c: Context) => {
 		return eventHandlers[eventType](c, slackClient, slackEvent)
 	}
 
-	// event type not found
 	console.error(`EVENT_TYPE: ${eventType} has no handler!!!`)
 	return c.json({ ok: true, no_handler: true})
 })
