@@ -4,13 +4,26 @@ Building out a minimal Slack App on Cloudflare Workers to take advantage of the 
 
 Uses the [Sagi Slack client for Cloudflare Workers](https://sagi.io/slack-api-for-cloudflare-workers/) ([GitHub](https://github.com/sagi/workers-slack)) since the recommended Slack Bolt and `@slack/web-api` packages are Node based and have issues running in the Cloudflare environment.
 
-## Current State
+## Benefits of the Slack Platform
 
-- Minimal example is functional with events `app_mention` and `app_home_opened`.
-- ⚠️ not secure yet as I have not successfully figured out how to map the signature verification from [Slack's SDK](https://github.com/slackapi/node-slack-sdk/blob/main/packages/events-api/src/http-handler.ts#L38) to fit with the Clouflare Workers [WebCrypto](https://developers.cloudflare.com/workers/examples/signing-requests/) utility. Seems close, but not quite there yet.
+The newer [Slack Platform](https://api.slack.com/future/quickstart) comes with a few obvious handy features:
 
-[Worth checking this link to see if it fixes my crypto problem](https://stackoverflow.com/questions/72315615/wrong-result-with-hmac-verification-using-subtlecrypto-in-javascript).
-[This StackOverflow as well](https://stackoverflow.com/questions/67871458/verify-hmac-hash-using-cloudflare-workers)
+- Built-in functions for interacting with Slack APIs
+- _"Run on Slack"_ lets you avoid dealing with hosting your own infra
+- NoSQL [datastores](https://api.slack.com/future/datastores), so you don't have to host your own persistence
+
+## Benefits of Slack Apps on Cloudflare Workers
+
+Despite not being natively supported by Slack's SDKs, running your app on Cloudflare Workers unlocks a number of commonly needed tools that may make it worth it:
+
+- [Workers KV](https://developers.cloudflare.com/workers/wrangler/workers-kv/), a key-value data store
+- [Cron Triggers](https://developers.cloudflare.com/workers/platform/triggers/cron-triggers/)
+- [Queues](https://developers.cloudflare.com/queues/)
+- [R2](https://developers.cloudflare.com/r2/), similar to S3 for file/blob storage
+- [Durable Objects](https://developers.cloudflare.com/workers/learning/using-durable-objects), another way to persist-data across Workers
+- _(alpha)_ [D1](https://developers.cloudflare.com/d1), SQLite at the edge
+
+On the surface there's a lot going for the Cloudflare ecosystem - I will add the ⚠️ caveat though: _I have not used them in Production, so cannot speak to availability, uptime, etc. that are important considerations when choosing platforms._
 
 ## Run locally
 
@@ -24,7 +37,7 @@ make run
 make send_test_event
 ```
 
-Response should look something like (`404` since it's not from us, not Slack):
+Response should look something like _(`404` since it's from us, not Slack)_:
 
 ```
 ./send-test-event.sh
@@ -53,12 +66,15 @@ make publish
   - [More info](https://github.com/cloudflare/wrangler/issues/371)
 - Why can't I just use the `@slack/web-api` package?
   - That package depends on Axios for sending requests, which seems like a pain to get working on Cloudflare](https://community.cloudflare.com/t/can-i-use-axios-in-a-worker/168139/2). If you try it, you'll end up with:
-  ```
-  [WARN]  web-api:WebClient:0 http request failed adapter is not a function
-TypeError: adapter is not a function
-    at dispatchRequest (index.js:4214:14)
-    at Axios.request (index.js:4488:19)
-    at Axios.httpMethod [as post] (index.js:4514:23)
-    at Function.wrap [as post] (index.js:3133:19)
-  ```
-- < your question here :D >
+    ```
+    [WARN]  web-api:WebClient:0 http request failed adapter is not a function
+    TypeError: adapter is not a function
+        at dispatchRequest (index.js:4214:14)
+        at Axios.request (index.js:4488:19)
+        at Axios.httpMethod [as post] (index.js:4514:23)
+        at Function.wrap [as post] (index.js:3133:19)
+    ```
+
+- Seeing in logs: `Your worker called response.clone(), but did not read the body of both clones....`
+  - This seems to be happening because of how [The `workers-slack` package](https://github.com/sagi/workers-slack) implements request verification. If it bothers you, you'll either need to submit an Issue and hope for a more efficient function (here or at the package), or write your own Slack verification functionality.
+- **< your question here :D >**

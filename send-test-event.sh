@@ -4,7 +4,7 @@ url="http://localhost:8787/slack/events"
 
 json_str='{
     "event": {
-        "type": "app_mention",
+        "type": "app_mention-ed",
         "user": "U061F7AUR",
         "text": "<@U0LAN0Z89> is it everything a river should be?",
         "ts": "1515449522.000016",
