@@ -1,0 +1,6 @@
+#! /bin/bash
+
+
+local_wrangler_executable="$(npm bin)/wrangler"
+
+$local_wrangler_executable $@

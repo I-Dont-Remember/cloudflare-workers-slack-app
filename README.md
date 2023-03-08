@@ -31,7 +31,7 @@ On the surface there's a lot going for the Cloudflare ecosystem - I will add the
 make run
 ```
 
-## Simple Test event
+### Simple Test event
 
 ```
 make send_test_event
@@ -58,6 +58,24 @@ Transfer-Encoding: chunked
 ```
 make publish
 ```
+
+## Tools
+
+### Wrangle
+
+Cloudflare recommends you install the [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/) locally to your project, rather than globally. It's annoying to run `npm run wrangle -- < args I actually wanted>`, so I added a simple script `./wrangle` that acts as a proxy to the locally installed version of `wrangler`.
+
+```
+# Example
+./wrangler secret list
+```
+
+### Localhost Tunnels
+
+When developing locally, Slack isn't able to "see" your localhost server to send events to. To get around this, we can use a tool that will forward a public address _(like `https://abc234.ngrok.io`)_ to your `localhost:< your app port>`. You have a couple common options to choose from:
+
+- [`ngrok`](https://ngrok.io) - simple to use, but endpoint changes every time and you have to update in the Slack App Console unless you have the paid version.
+- [`Cloudflared`](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/install-and-setup/installation/) - newer kid on the block, I haven't used it much yet.
 
 ## FAQ
 

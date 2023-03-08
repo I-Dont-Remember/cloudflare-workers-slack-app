@@ -1,9 +1,12 @@
 
 run:
-	npx wrangler dev
+	./wrangle dev
 
 send_test_event:
 	./send-test-event.sh
 
-publish:
-	npx wrangler publish src/index.ts --name hono-slack
+deploy:
+	./wrangle publish
+
+prod-logs:
+	./wrangle tail

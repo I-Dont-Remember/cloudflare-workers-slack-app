@@ -7,10 +7,10 @@ export enum IncomingEventType {
   Shortcut,
 }
 
-export function getEventTypeName(index: IncomingEventType | undefined) {
-    index = index || 0;
-    const incomingEvent = IncomingEventType
-    return incomingEvent[index]
+export function getEventTypeName(index: IncomingEventType | undefined): string {
+  index = index || 0;
+  const incomingEvent = IncomingEventType;
+  return incomingEvent[index];
 }
 
 // borrowed the logic from Slack's SDK on deciding which type of request this is (event, shortcut, view, etc.)
@@ -79,13 +79,13 @@ export function getTypeAndConversationAndPathKey(
       conversationId: actionBody.channel !== undefined
         ? actionBody.channel.id
         : undefined,
-      pathKey: body?.callback_id
+      pathKey: body?.callback_id,
     };
   }
   if (body.type === "shortcut") {
     return {
       type: IncomingEventType.Shortcut,
-      pathKey: body?.callback_id
+      pathKey: body?.callback_id,
     };
   }
   if (body.type === "message_action") {
@@ -95,15 +95,67 @@ export function getTypeAndConversationAndPathKey(
       conversationId: shortcutBody.channel !== undefined
         ? shortcutBody.channel.id
         : undefined,
-        pathKey: body?.callback_id
+      pathKey: body?.callback_id,
     };
   }
   if (body.type === "view_submission" || body.type === "view_closed") {
     return {
       type: IncomingEventType.ViewAction,
-      pathKey: body?.view?.callback_id
-
+      pathKey: body?.view?.callback_id,
     };
   }
   return {};
+}
+
+export function buildSampleAppHome(user_id: string): string {
+  // Build your own designs at https://app.slack.com/block-kit-builder/
+  let blocks = [
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": `Example app home with emojis! 😀 and more! <@${user_id}>`,
+      },
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": `Random Number per render: ${
+          Math.round(Math.random() * 10000)
+        }`,
+      },
+    },
+    {
+      "type": "actions",
+      "elements": [
+        // {
+        // 	"type": "button",
+        // 	"text": {
+        // 		"type": "plain_text",
+        // 		"text": "Open Modal",
+        // 		"emoji": true
+        // 	},
+        // 	"value": "click_me_123",
+        // 	"action_id": "open-modal"
+        // },
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "Go To Google",
+            "emoji": true,
+          },
+          "value": "click_me_123",
+          "url": "https://google.com",
+          "action_id": "button-action",
+        },
+      ],
+    },
+  ];
+  const appHomeView = {
+    type: "home",
+    blocks: blocks,
+  };
+  return JSON.stringify(appHomeView);
 }

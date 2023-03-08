@@ -6,7 +6,7 @@ compatibility_date = "2022-10-10"
 node_compat = true
 
 [vars]
-FAKE_VAR = "fake-var"
+# See .dev.vars.example for Secrets
 # The necessary secrets are:
 # - SLACK_BOT_TOKEN
 # - SLACK_SIGNING_SECRET

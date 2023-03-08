@@ -1,0 +1,3 @@
+# Copy to .dev.vars and fill in with secrets
+SLACK_BOT_TOKEN=xoxb-********-********
+SLACK_SIGNING_SECRET=******-********

@@ -2,12 +2,12 @@ declare module '@sagi.io/workers-slack';
 
 type SlackRESTClient = {
     views: {
-        publish: (any) => any
+        publish: ({user_id: string, view: string}) => any
     },
     chat: {
         postMessage: (any) => any
     }
     helpers: {
-        verifyRequestSignature: (any, string) => Promise<boolean> | Error
+        verifyRequestSignature: (Request, string) => Promise<boolean> | Error
     }
 }
