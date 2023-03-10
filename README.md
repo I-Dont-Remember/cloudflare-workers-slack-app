@@ -1,5 +1,9 @@
 # Slack App on Cloudflare Workers
 
+_Corresponding guide: [Building a Slack App On Cloudflare Workers](https://buildingonslack.com/docs/slack/building-a-slack-app-on-cloudflare-workers/)_
+
+---
+
 Building out a minimal Slack App on Cloudflare Workers to take advantage of the many utilities that are available (and continue to be released) on their platform.
 
 Uses the [Sagi Slack client for Cloudflare Workers](https://sagi.io/slack-api-for-cloudflare-workers/) ([GitHub](https://github.com/sagi/workers-slack)) since the recommended Slack Bolt and `@slack/web-api` packages are Node based and have issues running in the Cloudflare environment.
